@@ -86,6 +86,5 @@ async function changeUserCourse(req, res) {
 }
 
 
-
 module.exports = { createUser, getAllUsers, changeUserStatus, changeUserCourse };
 

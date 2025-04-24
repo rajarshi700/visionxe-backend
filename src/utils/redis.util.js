@@ -9,7 +9,17 @@ async function getPayloadFromRedis({ key, keyType }) {
     return await redisClient.get(`${key}:${keyType}`);
 }
 
+async function flushRedis() {
+    try {
+      await redisClient.flushAll();
+      console.log("Redis cache flushed successfully.");
+    } catch (error) {
+      console.error("Error while flushing Redis:", error);
+    }
+}
+
 module.exports = {
     savePayloadToRedis,
-    getPayloadFromRedis
+    getPayloadFromRedis,
+    flushRedis
 };
