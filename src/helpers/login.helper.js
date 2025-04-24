@@ -30,8 +30,9 @@ async function loginHelper({ phone, password }) {
     const role = get(userData, "role", '');
     const fingerprint = get(userData, "fingerprint", '');
     const courses = get(userData, "courses", []);
+    const userId = get(userData, "_id", '');
     const coursesIdArray = courses.map((course) => course.id.toString());
-    const redisPayloadValue = { otp, role, fingerprint, coursesIdArray, name, gateYear, email };
+    const redisPayloadValue = { otp, role, fingerprint, coursesIdArray, name, gateYear, email, userId };
     await sendEmail(email, "Your LMS OTP", `Your OTP is: ${otp}. It will expire in 5 minutes.`);
     await savePayloadToRedis({ key: phone, keyType: "userData", value: JSON.stringify(redisPayloadValue) });
 }
@@ -39,9 +40,11 @@ async function loginHelper({ phone, password }) {
 
 async function validateOtpHelper({ phone, otp, fingerprint }) {
     let userData = await getPayloadFromRedis({ key: phone, keyType: "userData" });
+    if (!userData) {
+        throw new Error("Session expired or invalid. Please login again.");
+    }
     userData = JSON.parse(userData);
-    const { otp: otpfromRedis, role, fingerprint: dbFingerprint, coursesIdArray = [], name, gateYear, email } = userData;
-    console.log(otpfromRedis, otp);
+    const { otp: otpfromRedis, role, fingerprint: dbFingerprint, coursesIdArray = [], name, gateYear, email, userId } = userData;
     if (otpfromRedis !== otp.toString()) {
         throw new Error("Invalid OTP");
     }
@@ -52,7 +55,7 @@ async function validateOtpHelper({ phone, otp, fingerprint }) {
         await User.updateOne({ phone }, { $set: { fingerprint: fingerprint.toString() } });
     }
 
-    const token = generateToken({ phone, role, coursesIdArray });
+    const token = generateToken({ phone, role, coursesIdArray, userId });
     return { token, name, email, gateYear, phone };
 }
 

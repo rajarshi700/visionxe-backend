@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate, isAdmin } = require('../middlewares/auth.middleware');
+const { authenticate, isAdmin, deviceAuthCheck } = require('../middlewares/auth.middleware');
 const {
     createUser,
     getAllUsers,
@@ -54,8 +54,8 @@ router.post('/login', sendOtp);
 router.post('/validate-otp', ValidateOtpAndLogin);
 
 // Course content (protected)
-router.post('/courses', authenticate, getAllCourses);
-router.post('/chapters', authenticate, getAllChapters);
-router.post('/lectures', authenticate, getAllLectures);
+router.post('/courses', authenticate, deviceAuthCheck, getAllCourses);
+router.post('/chapters', authenticate, deviceAuthCheck, getAllChapters);
+router.post('/lectures', authenticate, deviceAuthCheck, getAllLectures);
 
 module.exports = router;
