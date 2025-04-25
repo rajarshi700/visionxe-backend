@@ -13,10 +13,7 @@ module.exports = async (req, res, next) => {
     // First request → set expiry
     if (current === 1) {
       await redis.expire(key, WINDOW);
-      console.log(`[RATE LIMIT] New key set for ${id}. Window: ${WINDOW}s`);
     }
-
-    console.log(`[RATE LIMIT] IP: ${id} | Request Count: ${current}/${LIMIT}`);
 
     // If over limit → block
     if (current > LIMIT) {
