@@ -1,21 +1,32 @@
 const redis = require('../config/redis.config');
 
-const WINDOW = 60;
-const LIMIT  = 100;
+const WINDOW = 60; // 60 seconds
+const LIMIT = 100; // Max 100 requests per window
 
 module.exports = async (req, res, next) => {
-  const id  = req.ip;
+  const id = req.headers['x-forwarded-for'] || req.ip;
   const key = `ratelimit:${id}`;
 
   try {
     const current = await redis.incr(key);
-    if (current === 1) await redis.expire(key, WINDOW);
+
+    // First request → set expiry
+    if (current === 1) {
+      await redis.expire(key, WINDOW);
+      console.log(`[RATE LIMIT] New key set for ${id}. Window: ${WINDOW}s`);
+    }
+
+    console.log(`[RATE LIMIT] IP: ${id} | Request Count: ${current}/${LIMIT}`);
+
+    // If over limit → block
     if (current > LIMIT) {
+      console.warn(`[RATE LIMIT BLOCKED] IP: ${id} exceeded limit (${LIMIT})`);
       return res.status(429).json({ error: 'Too many requests.' });
     }
+
     next();
   } catch (err) {
-    console.error('Rate limiter error:', err);
+    console.error('[RATE LIMIT ERROR]', err);
     next();
   }
 };
