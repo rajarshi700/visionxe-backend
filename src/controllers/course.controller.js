@@ -4,7 +4,9 @@ const {
     createLectureHelper,
     getAllChaptersHelperForStudent,
     getAllCoursesHelperForStudent,
-    getAllLecturesHelperForStudent
+    getAllLecturesHelperForStudent,
+    createTestimonialHelper,
+    getTestimonialsHelper,
 } = require("../helpers/course.helper");
 
 
@@ -133,6 +135,46 @@ async function getAllLectures(req, res) {
 
 
 
+
+async function createTestimonial(req, res) {
+  try {
+    const { name, rank, college, phone, testimonial, profilePhoto, bannerImage } = req.body;
+    if (!name || !rank || !college || !phone || !testimonial || !profilePhoto || !bannerImage)
+      return res.status(400).json({ message: "Fill all the details" });
+    if (
+      typeof name !== "string" ||
+      typeof rank !== "string" ||
+      typeof college !== "string" ||
+      typeof phone !== "string" ||
+      typeof testimonial !== "string" ||
+      typeof profilePhoto !== "string" ||
+      typeof bannerImage !== "string"
+    )
+      return res.status(400).json({ message: "Invalid details" });
+    await createTestimonialHelper({ name, rank, college, phone, testimonial, profilePhoto, bannerImage });
+    res.status(200).json({ message: "testimonial created successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "testimonial creation failed", error: error.message });
+    console.log(error);
+  }
+}
+
+
+async function getTestimonials(req, res) {
+  try {
+    const testimonials = await getTestimonialsHelper();
+    res.status(200).json({ message: "testimonial fetched successfully",  testimonials });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "testimonial fetching failed", error: error.message });
+    console.log(error);
+  }
+}
+
+
 module.exports = {
   createCourse,
   createChapter,
@@ -140,5 +182,7 @@ module.exports = {
   getAllCourses,
   getAllChapters,
   getAllLectures,
+  createTestimonial,
+  getTestimonials,
 };
 

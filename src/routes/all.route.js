@@ -19,8 +19,11 @@ const {
     getAllCourses,
     getAllChapters,
     getAllLectures,
+    createTestimonial,
+    getTestimonials,
 } = require("../controllers/course.controller");
 
+const { flushRedisController } = require("../controllers/miscellaneous.controller");
 
 
 // ---------------------- Health Check --------------------------------------------------------------------
@@ -38,16 +41,21 @@ router.post('/create', authenticate, isAdmin, createUser);
 router.post('/users', authenticate, isAdmin, getAllUsers);
 router.post('/change-user-status', authenticate, isAdmin, changeUserStatus);
 router.post('/change-user-course', authenticate, isAdmin, changeUserCourse);
+router.get('/flush-redis',  authenticate, isAdmin, flushRedisController);
 
 // Course management
 router.post('/create-course', authenticate, isAdmin, createCourse);
 router.post('/create-chapter', authenticate, isAdmin, createChapter);
 router.post('/create-lecture', authenticate, isAdmin, createLecture);
 
+// Testimonial management
+router.post('/create-testimonial', authenticate, isAdmin, createTestimonial);
 
 
 
 // ---------------------- Public/User Routes ------------------------------------------------------------------------
+// testimonials
+router.get('/testimonials', getTestimonials);
 
 // 2 factor Auth
 router.post('/login', sendOtp);

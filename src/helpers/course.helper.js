@@ -1,6 +1,7 @@
 const Course = require("../models/courses.model");
 const Chapter = require("../models/chapters.model");
 const Lecture = require("../models/lectures.model");
+const Topper = require("../models/toppers.model");
 const { savePayloadToRedis, getPayloadFromRedis } = require("../utils/redis.util");
 
 async function createCourseHelper({ name, description, image, code }) {
@@ -76,7 +77,29 @@ async function getAllLecturesHelperForStudent({ chapterId }) {
     return lectures;
 }
 
+async function createTestimonialHelper({ name, rank, college, phone, testimonial, profilePhoto, bannerImage }) {
+    const topper = new Topper({ name, rank, college, phone, testimonial, profilePhoto, bannerImage }); 
+    await topper.save();
+}
 
+async function getTestimonialsHelper() {
+  const cachedTestimonials = await getPayloadFromRedis({
+    key: "testimonials",
+    keyType: "testimonials",
+  });
+  if (cachedTestimonials) {
+    return JSON.parse(cachedTestimonials);
+  }
+  const testimonials = await Topper.find({ isActive: true }).lean();
+  if (!testimonials || !testimonials.length) return [];
+  await savePayloadToRedis({
+    key: "testimonials",
+    keyType: "testimonials",
+    value: JSON.stringify(testimonials),
+    expireTime: 86400 * 7,
+  });
+  return testimonials;
+}
 
 module.exports = {
     createLectureHelper,
@@ -86,4 +109,6 @@ module.exports = {
     getAllCoursesHelperForStudent,
     getAllLecturesHelperForStudent,
     getCoursesListingForAdmin,
+    createTestimonialHelper,
+    getTestimonialsHelper,
 }
