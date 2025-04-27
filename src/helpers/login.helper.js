@@ -4,6 +4,7 @@ const { generateOTP } = require("../utils/otp.util");
 const { sendEmail } = require("../utils/emailer.util");
 const { generateToken } = require("../utils/jwt.util");
 const { savePayloadToRedis, getPayloadFromRedis } = require("../utils/redis.util");
+const { getQuote } = require("../utils/ai.util");
 
 async function loginHelper({ phone, password }) {
     const userData = await User.findOne(
@@ -34,7 +35,7 @@ async function loginHelper({ phone, password }) {
     const coursesIdArray = courses.map((course) => course.id.toString());
     const redisPayloadValue = { otp, role, fingerprint, coursesIdArray, name, gateYear, email, userId };
     await sendEmail(email, "Your LMS OTP", `Your OTP is: ${otp}. It will expire in 5 minutes.`);
-    await savePayloadToRedis({ key: phone, keyType: "userData", value: JSON.stringify(redisPayloadValue) });
+    await savePayloadToRedis({ key: phone, keyType: "userData", value: JSON.stringify(redisPayloadValue), expireTime: 600 });
 }
 
 
@@ -56,7 +57,12 @@ async function validateOtpHelper({ phone, otp, fingerprint }) {
     }
 
     const token = generateToken({ phone, role, coursesIdArray, userId });
-    return { token, name, email, gateYear, phone };
+    let quote = await getPayloadFromRedis({ key: "quote", keyType: "quote" });
+    if(!quote) {
+        quote = await getQuote();
+        await savePayloadToRedis({ key: "quote", keyType: "quote", value: quote, expireTime: 3600 * 3 });
+    }
+    return { token, name, email, gateYear, phone, quote };
 }
 
 

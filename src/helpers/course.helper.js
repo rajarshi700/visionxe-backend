@@ -49,7 +49,7 @@ async function getAllAvailableCoursesForSaleHelper (){
     if (cachedCourses) {
         return JSON.parse(cachedCourses);
     };
-    const courses = await Course.find({ isActive: true }).lean();
+    const courses = await Course.find({ isActive: true }, { _id: 0, code: 0 }).lean();
     if (!courses || !courses.length) return [];
     await savePayloadToRedis({ key: "courses", keyType: "courses", value: JSON.stringify(courses), expireTime: 86400 * 7 });
     return courses;
