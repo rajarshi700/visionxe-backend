@@ -39,7 +39,7 @@ const convertToEmbedUrl = (url) => {
 
 
 async function getAllCoursesHelperForStudent({ coursesIdArray }) {
-    const courses = await Course.find({ _id: { $in: coursesIdArray }, isActive: true }).lean();
+    const courses = await Course.find({ _id: { $in: coursesIdArray }, isActive: true }, { _id: 1, name: 1, description: 1, code: 1, image: 1 }).lean();
     if (!courses || !courses.length) return [];
     return courses;
 }
