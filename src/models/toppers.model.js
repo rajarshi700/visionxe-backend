@@ -9,6 +9,7 @@ const topperSchema = new mongoose.Schema({
     testimonial: { type: String, required: true },
     bannerImage: { type: String, required: true },
     isActive: { type: Boolean, default: true },
+    rating: { type: Number, default: () => Math.random() < 0.5 ? 5 : 4 }
 });
 
 const Topper = mongoose.model("Topper", topperSchema);

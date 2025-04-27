@@ -4,10 +4,11 @@ const Lecture = require("../models/lectures.model");
 const Topper = require("../models/toppers.model");
 const { savePayloadToRedis, getPayloadFromRedis } = require("../utils/redis.util");
 
-async function createCourseHelper({ name, description, image, code }) {
-    const course = new Course({ name, description, image, code }); 
+async function createCourseHelper(courseData) {
+    const course = new Course(courseData);
     await course.save();
 }
+  
 
 
 async function createChapterHelper({ name, description, courseId }) {
@@ -40,6 +41,17 @@ const convertToEmbedUrl = (url) => {
 async function getAllCoursesHelperForStudent({ coursesIdArray }) {
     const courses = await Course.find({ _id: { $in: coursesIdArray }, isActive: true }).lean();
     if (!courses || !courses.length) return [];
+    return courses;
+}
+
+async function getAllAvailableCoursesForSaleHelper (){
+    const cachedCourses = await getPayloadFromRedis({ key: "courses", keyType: "courses" });
+    if (cachedCourses) {
+        return JSON.parse(cachedCourses);
+    };
+    const courses = await Course.find({ isActive: true }).lean();
+    if (!courses || !courses.length) return [];
+    await savePayloadToRedis({ key: "courses", keyType: "courses", value: JSON.stringify(courses), expireTime: 86400 * 7 });
     return courses;
 }
 
@@ -111,4 +123,5 @@ module.exports = {
     getCoursesListingForAdmin,
     createTestimonialHelper,
     getTestimonialsHelper,
+    getAllAvailableCoursesForSaleHelper,
 }
