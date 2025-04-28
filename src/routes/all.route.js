@@ -42,7 +42,7 @@ router.post('/create', authenticate, isAdmin, createUser);
 router.post('/users', authenticate, isAdmin, getAllUsers);
 router.post('/change-user-status', authenticate, isAdmin, changeUserStatus);
 router.post('/change-user-course', authenticate, isAdmin, changeUserCourse);
-router.post('/flush-redis', flushRedisController);
+router.post('/flush-redis', authenticate, isAdmin, flushRedisController);
 
 // Course management
 router.post('/create-course', authenticate, isAdmin, createCourse);
