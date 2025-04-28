@@ -24,7 +24,7 @@ async function callGroq(prompt) {
 }
 
 async function getQuote() {
-    const prompt = "Give me one famous short motivational quote in English in the format: 'Quote' - Person's Name.";
+    const prompt = "Give me one famous short motivational quote in English in the format: Quote - Person's Name." ;
     const quote = await callGroq(prompt);
     if (!quote) return "Stay positive and keep moving forward!";
     return quote;

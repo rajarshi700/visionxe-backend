@@ -62,7 +62,8 @@ async function validateOtpHelper({ phone, otp, fingerprint }) {
         quote = await getQuote();
         await savePayloadToRedis({ key: "quote", keyType: "quote", value: quote, expireTime: 3600 * 3 });
     }
-    return { token, name, email, gateYear, phone, quote };
+    const [quoteValue, author] = quote.split(' - ');
+    return { token, name, email, gateYear, phone, quote: quoteValue, author };
 }
 
 
