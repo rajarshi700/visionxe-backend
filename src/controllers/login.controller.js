@@ -6,10 +6,10 @@ const sendOtp = async (req, res) => {
         const { phone, password } = req.body;
 
         if (!phone || !password) {
-            return res.status(400).json({ message: "Phone Number and Password are required" });
+            throw new Error("Phone Number and Password are required");
         }
         if(typeof phone !== "number" || phone.toString().length !== 10) {
-            return res.status(400).json({ message: "Invalid phone number" });
+            throw new Error("Invalid phone number");
         }
 
         await loginHelper({ phone, password });
@@ -25,8 +25,11 @@ const ValidateOtpAndLogin = async (req, res) => {
     try {
         const { phone, otp, fingerprint } = req.body;
 
-        if (!phone || !otp || !fingerprint) {
-            return res.status(400).json({ message: "Phone, OTP and fingerprint are required" });
+        if (!phone  || !fingerprint) {
+            return res.status(400).json({ message: "Phone and fingerprint are required" });
+        }
+        if (!otp) {
+            throw new Error("OTP is required");
         }
         if(typeof phone !== "number" || phone.toString().length !== 10) {
             return res.status(400).json({ message: "Invalid phone number" });
